@@ -10,10 +10,10 @@
 
 ```
 cadasu/
-├── docker-compose/        # 本 repo
-├── OSLO-backend/          # Django 後端
-├── OSLO-frontend/         # React 前端
-└── image-processing-server/  # 圖片處理服務
+├── cadasu-docker-compose/     # 本 repo
+├── OSLO-backend/              # Django 後端
+├── OSLO-frontend/             # React 前端
+└── image-processing-server/   # 圖片處理服務
 ```
 
 ## 設置步驟
@@ -65,7 +65,7 @@ Frontend 設定相對簡單，主要是 API 連接設定。
 ### 3. 啟動服務
 
 ```bash
-# 在 docker-compose 目錄下
+# 在 cadasu-docker-compose 目錄下
 # 第一次啟動時構建映像
 docker compose up --build -d
 
@@ -111,13 +111,13 @@ docker compose exec backend bash
 ## 環境變數管理
 
 ### 優先順序
-1. Docker Compose 在 `docker-compose/` 目錄下的環境變數檔案優先
+1. Docker Compose 在 `cadasu-docker-compose/` 目錄下的環境變數檔案優先
 2. 各專案內的 `.env` 檔案不會被使用（除非您修改 compose.yaml）
 3. 服務間的連接使用容器名稱（如 `postgres`、`redis`）
 
 ### 檔案結構
 ```
-docker-compose/
+cadasu-docker-compose/
 ├── .env                    # Docker Compose 基礎設定
 ├── backend.env            # Backend 服務環境變數
 ├── frontend.env           # Frontend 服務環境變數
