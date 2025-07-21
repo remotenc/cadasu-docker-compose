@@ -1,0 +1,16 @@
+FROM node:20-bookworm AS builder
+WORKDIR /app
+
+ARG FRONTEND_PATH
+
+COPY ${FRONTEND_PATH}/package.json ${FRONTEND_PATH}/yarn.lock ./
+
+RUN yarn install
+
+FROM node:20-bookworm
+WORKDIR /app
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json /app/yarn.lock ./
+
+CMD ["yarn", "dev", "--host", "0.0.0.0"]

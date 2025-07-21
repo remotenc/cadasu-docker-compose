@@ -1,0 +1,16 @@
+# Environment files
+.env
+backend.env
+frontend.env
+image-processor.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

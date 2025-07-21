@@ -1,0 +1,115 @@
+services:
+  backend:
+    build:
+      context: ${BACKEND_PATH}/..
+      dockerfile: ./docker-compose/Dockerfile.backend
+      args:
+        - BACKEND_PATH=${BACKEND_PATH}
+    container_name: ${COMPOSE_PROJECT_NAME}-backend
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    volumes:
+      - ${BACKEND_PATH}:/app
+      - ${BACKEND_PATH}/logs:/app/logs
+    ports:
+      - "${BACKEND_PORT}:8000"
+    env_file:
+      - ./backend.env
+    depends_on:
+      - postgres
+      - redis
+
+  celery-broadcast:
+    build:
+      context: ${BACKEND_PATH}/..
+      dockerfile: ./docker-compose/Dockerfile.celery
+      args:
+        - BACKEND_PATH=${BACKEND_PATH}
+    container_name: ${COMPOSE_PROJECT_NAME}-celery-broadcast
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: python -m celery -A backend worker -l debug --concurrency=5 -P threads -Q boardcast_queue
+    volumes:
+      - ${BACKEND_PATH}:/app
+      - ${BACKEND_PATH}/logs:/app/logs
+    env_file:
+      - ./backend.env
+    depends_on:
+      - backend
+      - redis
+
+  celery-io:
+    build:
+      context: ${BACKEND_PATH}/..
+      dockerfile: ./docker-compose/Dockerfile.celery
+      args:
+        - BACKEND_PATH=${BACKEND_PATH}
+    container_name: ${COMPOSE_PROJECT_NAME}-celery-io
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: python -m celery -A backend worker -l info --concurrency=5 -P eventlet -Q io_queue
+    volumes:
+      - ${BACKEND_PATH}:/app
+      - ${BACKEND_PATH}/logs:/app/logs
+    env_file:
+      - ./backend.env
+    depends_on:
+      - backend
+      - redis
+
+  frontend:
+    build:
+      context: ${FRONTEND_PATH}/..
+      dockerfile: ./docker-compose/Dockerfile.frontend
+      args:
+        - FRONTEND_PATH=${FRONTEND_PATH}
+    container_name: ${COMPOSE_PROJECT_NAME}-frontend
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    volumes:
+      - ${FRONTEND_PATH}:/app:cached
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    env_file:
+      - ./frontend.env
+
+  image-processor:
+    build:
+      context: ${IMAGE_PROCESSOR_PATH}/..
+      dockerfile: ./docker-compose/Dockerfile.image-processor
+      args:
+        - IMAGE_PROCESSOR_PATH=${IMAGE_PROCESSOR_PATH}
+    container_name: ${COMPOSE_PROJECT_NAME}-image-processor
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    volumes:
+      - ${IMAGE_PROCESSOR_PATH}:/app
+    env_file:
+      - ./image-processor.env
+
+  postgres:
+    image: pgvector/pgvector:0.8.0-pg16
+    container_name: ${COMPOSE_PROJECT_NAME}-postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+
+volumes:
+  postgres_data:
