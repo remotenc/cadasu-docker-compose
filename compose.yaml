@@ -2,13 +2,14 @@ services:
   backend:
     build:
       context: ${BACKEND_PATH}/..
-      dockerfile: ./docker-compose/Dockerfile.backend
+      dockerfile: ./cadasu-docker-compose/Dockerfile.django
       args:
         - BACKEND_PATH=${BACKEND_PATH}
     container_name: ${COMPOSE_PROJECT_NAME}-backend
     working_dir: /app
     stdin_open: true
     tty: true
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ${BACKEND_PATH}:/app
       - ${BACKEND_PATH}/logs:/app/logs
@@ -23,7 +24,7 @@ services:
   celery-broadcast:
     build:
       context: ${BACKEND_PATH}/..
-      dockerfile: ./docker-compose/Dockerfile.celery
+      dockerfile: ./cadasu-docker-compose/Dockerfile.django
       args:
         - BACKEND_PATH=${BACKEND_PATH}
     container_name: ${COMPOSE_PROJECT_NAME}-celery-broadcast
@@ -43,7 +44,7 @@ services:
   celery-io:
     build:
       context: ${BACKEND_PATH}/..
-      dockerfile: ./docker-compose/Dockerfile.celery
+      dockerfile: ./cadasu-docker-compose/Dockerfile.django
       args:
         - BACKEND_PATH=${BACKEND_PATH}
     container_name: ${COMPOSE_PROJECT_NAME}-celery-io
@@ -63,7 +64,7 @@ services:
   frontend:
     build:
       context: ${FRONTEND_PATH}/..
-      dockerfile: ./docker-compose/Dockerfile.frontend
+      dockerfile: ./cadasu-docker-compose/Dockerfile.frontend
       args:
         - FRONTEND_PATH=${FRONTEND_PATH}
     container_name: ${COMPOSE_PROJECT_NAME}-frontend
@@ -81,7 +82,7 @@ services:
   image-processor:
     build:
       context: ${IMAGE_PROCESSOR_PATH}/..
-      dockerfile: ./docker-compose/Dockerfile.image-processor
+      dockerfile: ./cadasu-docker-compose/Dockerfile.image-processor
       args:
         - IMAGE_PROCESSOR_PATH=${IMAGE_PROCESSOR_PATH}
     container_name: ${COMPOSE_PROJECT_NAME}-image-processor
